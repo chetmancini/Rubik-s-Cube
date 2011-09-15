@@ -47,7 +47,6 @@ class Face:
 				return False
 		return True
 
-
 class Rubik:
 
 	__moves = 0
@@ -250,15 +249,60 @@ class Rubik:
 
 	def frontCounter():
 		front.rotateCounter()
-		#TODO
+		temp1 = top.face[6]
+		temp2 = top.face[7]
+		temp3 = top.face[8]
+		top.face[6] = right.face[6]
+		top.face[7] = right.face[7]
+		top.face[8] = right.face[8]
+		right.face[6] = bottom.face[2]
+		right.face[7] = bottom.face[1]
+		right.face[8] = bottom.face[0]
+		bottom.face[2] = left.face[6] 
+		bottom.face[1] = left.face[7]
+		bottom.face[0] = left.face[8]
+		left.face[6] = temp1
+		left.face[7] = temp2
+		left.face[8] = temp3
 	
-	def backRight():
-		back.rotateLeft()
-		#TODO
+	def backClock():
+		back.rotateCounter()
+		temp1 = top.face[0]
+		temp2 = top.face[1]
+		temp3 = top.face[2]
+		top.face[0] = left.face[0]
+		top.face[1] = left.face[1]
+		top.face[2] = left.face[2]
+		left.face[0] = bottom.face[6]
+		left.face[1] = bottom.face[7]
+		left.face[2] = bottom.face[8]
+		bottom.face[6] = right.face[2]
+		bottom.face[7] = right.face[1]
+		bottom.face[8] = right.face[0]
+		right.face[2] = temp3
+		right.face[1] = temp2
+		right.face[0] = temp1
 
-	def backLeft():
-		back.rotateRight()
-		#TODO
+
+	def backCounter():
+		back.rotateClock()
+		temp1 = top.face[0]
+		temp2 = top.face[1]
+		temp3 = top.face[2]
+		top.face[0] = right.face[0]
+		top.face[1] = right.face[1]
+		top.face[2] = right.face[2]
+		right.face[0] = bottom.face[8]
+		right.face[1] = bottom.face[7]
+		right.face[2] = bottom.face[6]
+		bottom.face[8] = left.face[2]
+		bottom.face[7] = left.face[1]
+		bottom.face[6] = left.face[0]
+		left.face[2] = temp3
+		left.face[1] = temp2
+		left.face[0] = temp1
+
+
 
 	# Main Algorithm
 	def solve():
