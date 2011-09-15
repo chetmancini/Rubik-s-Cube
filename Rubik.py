@@ -2,6 +2,7 @@
 
 import os, sys
 
+# Easy hack for enums. Not terribly pythonic, but will get job done here.
 class Color:
 	B = "B"
 	W = "W"
@@ -13,7 +14,7 @@ class Color:
 class Face:
 	face = []
 
-	def rotateRight():
+	def rotateClock():
 		temp = face
 		temp[0] = face[6]
 		temp[1] = face[3]
@@ -26,7 +27,7 @@ class Face:
 		temp[8]	= face[2]
 		face = temp
 
-	def rotateLeft():
+	def rotateCounter():
 		temp = face
 		temp[0] = face[2]
 		temp[1] = face[5]
@@ -81,8 +82,8 @@ class Rubik:
 			and front.allSameColor()
 			and back.allSameColor()
 
-	def topLeft():
-		top.rotateLeft()
+	def topCounter():
+		top.rotateCounter()
 		temp1 = front.face[0]
 		temp2 = front.face[1]
 		temp3 = front.face[2]
@@ -92,21 +93,21 @@ class Rubik:
 		left.face[2] = back.face[8]
 		left.face[5] = back.face[7]
 		left.face[8] = back.face[6]
-		back.face[6] = right.face[0]
-		back.face[7] = right.face[3]
 		back.face[8] = right.face[6]
-		right.face[0] = temp3
-		right.face[3] = temp2
+		back.face[7] = right.face[3]
+		back.face[6] = right.face[0]
 		right.face[6] = temp1
+		right.face[3] = temp2
+		right.face[0] = temp3
 
 
-	def topRight():
-		top.rotateRight()
+	def topClock():
+		top.rotateClock()
 		temp1 = front.face[0]
 		temp2 = front.face[1]
 		temp3 = front.face[2]
 		front.face[0] = right.face[0]
-		front.face[1] = right.face[6]
+		front.face[1] = right.face[3]
 		front.face[2] = right.face[6]
 		right.face[0] = back.face[6]
 		right.face[3] = back.face[7]
@@ -114,12 +115,12 @@ class Rubik:
 		back.face[6] = left.face[8]
 		back.face[7] = left.face[5]
 		back.face[8] = left.face[2]		
-		left.face[2] = back.face[8]
-		left.face[5] = back.face[7]
-		left.face[8] = back.face[6]
+		left.face[8] = temp3
+		left.face[5] = temp2
+		left.face[2] = temp1
 
 	def leftForward():
-		left.rotateRight()
+		left.rotateClock()
 		temp1 = front.face[0]
 		temp2 = front.face[3]
 		temp3 = front.face[6]
@@ -138,7 +139,7 @@ class Rubik:
 
 	
 	def leftBackward():
-		left.rotateLeft()
+		left.rotateCounter()
 		temp1 = front.face[0]
 		temp2 = front.face[3]
 		temp3 = front.face[6]
@@ -156,7 +157,7 @@ class Rubik:
 		top.face[6] = temp3
 
 	def rightForward():
-		right.rotateLeft()
+		right.rotateCounter()
 		temp1 = front.face[2]
 		temp2 = front.face[5]
 		temp3 = front.face[8]
@@ -174,23 +175,81 @@ class Rubik:
 		bottom.face[8] = temp3
 	
 	def rightBackward():
-		right.rotateRight()
-		#TODO
-
-	def bottomLeft():
-		bottom.rotateLeft()
-		#TODO
+		right.rotateClock()
+		temp1 = front.face[2]
+		temp2 = front.face[5]
+		temp3 = front.face[8]
+		front.face[2] = bottom.face[2]
+		front.face[5] = bottom.face[5]
+		front.face[8] = bottom.face[8]
+		bottom.face[2] = back.face[2]
+		bottom.face[5] = back.face[5]
+		bottom.face[8] = back.face[8]
+		back.face[2] = top.face[2]
+		back.face[5] = top.face[5]
+		back.face[8] = top.face[8]
+		top.face[2] = temp1
+		top.face[5] = temp2
+		top.face[8] = temp3
 	
-	def bottomRight():
-		bottom.rotateRight()
-		#TODO
-	
-	def frontRight():
-		front.rotateRight()
-		#TODO
+	#As Viewed from the TOP
+	def bottomCounter():
+		bottom.rotateCounter()
+		temp1 = front.face[6]
+		temp2 = front.face[7]
+		temp3 = front.face[8]
+		front.face[6] = left.face[0]
+		front.face[7] = left.face[3]
+		front.face[8] = left.face[6]
+		left.face[0] = back.face[2]
+		left.face[3] = back.face[1]
+		left.face[6] = back.face[0]
+		back.face[2] = right.face[8]
+		back.face[1] = right.face[5]
+		back.face[0] = right.face[2]
+		right.face[8] = temp1
+		right.face[5] = temp2
+		right.face[2] = temp3
 
-	def frontLeft():
-		front.rotateLeft()
+	#As View from the TOP
+	def bottomClock():
+		bottom.rotateClock()
+		temp1 = front.face[6]
+		temp2 = front.face[7]
+		temp3 = front.face[8]
+		front.face[6] = right.face[8]
+		front.face[7] = right.face[5]
+		front.face[8] = right.face[2]
+		right.face[8] = back.face[2]
+		right.face[5] = back.face[1]
+		right.face[2] = back.face[0]
+		back.face[2] = left.face[0]
+		back.face[1] = left.face[3]
+		back.face[0] = left.face[6]
+		left.face[0] = temp1
+		left.face[3] = temp2
+		left.face[6] = temp3
+	
+	def frontClock():
+		front.rotateClock()
+		temp1 = top.face[6]
+		temp2 = top.face[7]
+		temp3 = top.face[8]
+		top.face[6] = left.face[6]
+		top.face[7] = left.face[7]
+		top.face[8] = left.face[8]
+		left.face[6] = bottom.face[2]
+		left.face[7] = bottom.face[1]
+		left.face[8] = bottom.face[0]
+		bottom.face[2] = right.face[6]
+		bottom.face[1] = right.face[7]
+		bottom.face[0] = right.face[8]
+		right.face[6] = temp1
+		right.face[7] = temp2
+		right.face[8] = temp3
+
+	def frontCounter():
+		front.rotateCounter()
 		#TODO
 	
 	def backRight():
