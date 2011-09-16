@@ -49,7 +49,7 @@ class Face:
 
 class Rubik:
 
-	__moves = 0
+	paths = []
 
 	# Representation is stored in a 9-element list
 	# 1-3, 4-6, 7-9
@@ -59,19 +59,68 @@ class Rubik:
 	right = Face()
 	front = Face()
 	back = Face()
-
-
-	def load():
-		f = open(sys.args[1], "r")
-		# load data structures.		
-		f.close()
-
-	def swap(v1, v2):
-		temp = v1
-		v1 = v2
-		v2 = temp
 	
-	def threeSwap()
+	def successors():
+		TopCounter = Rubik(self).topCounter()
+		TopCounter.paths.push("TCo")
+
+		TopClock = Rubik(self).topClock()
+		TopClock.paths.push("TCl")
+
+		LeftForward = Rubik(self).leftForward()
+		LeftForward.paths.push("LF")
+
+		LeftBackward = Rubik(self).leftBackward()
+		LeftBackward.paths.push("LB")
+
+		RightForward = Rubik(self).rightForward()
+		RightForward.paths.push("RF")
+
+		RightBackward = Rubik(self).rightBackward()
+		RightBackward.paths.push("RB")
+
+		BottomCounter = Rubik(self).bottomCounter()
+		BottomCounter.paths.push("BCo")
+
+		BottomClock = Rubik(self).bottomClock()
+		BottomClock.paths.push("BCl")
+
+		FrontClock = Rubik(self).frontClock()
+		FrontClock.paths.push("FCl")
+
+		FrontCounter = Rubik(self).frontCounter()
+		FrontCounter.paths.push("FCo")
+
+		BackClock = Rubik(self).backClock()
+		BackClock.paths.push("BaCl")
+
+		BackCounter = Rubik(self).backCounter()
+		BackCounter.paths.push("BaCo")
+
+		return [
+			TopCounter, 
+			TopClock, 
+			LeftForward, 
+			LeftBackward, 
+			RightForward, 
+			RightBackward, 
+			BottomCounter, 
+			BottomClock, 
+			FrontClock, 
+			FrontCounter, 
+			BackClock, 
+			BackCounter,
+			]
+
+	def dictKey():
+		toReturn = []
+		toReturn.append(top.face)
+		toReturn.append(bottom.face)
+		toReturn.append(left.face)
+		toReturn.append(right.face)
+		toReturn.append(front.face)
+		toReturn.append(back.face)
+		return toReturn
 	
 	def goalCheck():
 		return top.allSameColor() 
@@ -304,7 +353,63 @@ class Rubik:
 
 
 
+class Solver:
+	Cube = Rubik()
+
+	def readFace(face, f):
+		line1 = f.readLine().split()
+		line2 = f.readLine().split()
+		line3 = f.readLine().split()
+		face = line1
+		face[3] = line2[0]
+		face[4] = line2[1]
+		face[5] = line2[2]
+		face[6] = line3[0]
+		face[7] = line3[1]
+		face[8] = line4[2]
+
+	def load():
+		f = open(sys.argv[1], "r")
+		readFace(Cube.back, f)
+		readFace(Cube.left, f)
+		readFace(Cube.top, f)
+		readFace(Cube.right, f)
+		readFace(Cube.front, f)
+		readFace(Cube.bottom, f)
+		f.close()
+
 	# Main Algorithm
 	def solve():
-		__moves = 0
+		load()
+		openList = Cube.successors()
+		closeList = {}
+		moves = 0
+		while True:
+			newCube = openList.pop()
+			if closeList.hasKey(newCube.dictKey()) or (len(newCube.paths) == 20):
+				continue
+			else:
+				closeList[newCube.dictKey()] = newCube
+
+			if newCube.goalCheck():
+				return ", ".join(newCube.paths)
+			else:
+				for cube in newCube.successors():
+					if !closeList.hasKey(cube.dictKey()):
+						openList.push(cube)
+			if len(openList) == 0:
+				break
+			return "failure"
+
+
+##################
+### Run ##########
+DoIt = Solver()
+DoIt.solve()
+
+
+
+
+
+
 		
