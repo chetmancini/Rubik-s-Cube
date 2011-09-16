@@ -1,415 +1,440 @@
 # Author Chet Mancini
+#
+#
+# Input: 3x54 matrix, columns are seperated vertically by spaces.
+# W Y B
+# G Y R
+# R O B
+# ...
+import sys, copy
 
-import os, sys
 
 # Easy hack for enums. Not terribly pythonic, but will get job done here.
 class Color:
-	B = "B"
-	W = "W"
-	Y = "Y"
-	R = "R"
-	G = "G"
-	O = "O"
+    B = "B"
+    W = "W"
+    Y = "Y"
+    R = "R"
+    G = "G"
+    O = "O"
 
 class Face:
-	face = []
+    #List to store the color values
+    # Representation is stored in a 9-element list
+    # 1-3, 4-6, 7-9
+    face = []
 
-	def rotateClock():
-		temp = face
-		temp[0] = face[6]
-		temp[1] = face[3]
-		temp[2] = face[0]
-		temp[3] = face[7]
-		#faceClone[4] = face[4] (always static)
-		temp[5] = face[1]
-		temp[6] = face[8]
-		temp[7] = face[5]
-		temp[8]	= face[2]
-		face = temp
+    # Rotate a face clockwise
+    def rotateClock(self):
+        temp = self.face
+        temp[0] = self.face[6]
+        temp[1] = self.face[3]
+        temp[2] = self.face[0]
+        temp[3] = self.face[7]
+        #faceClone[4] = face[4] (always static)
+        temp[5] = self.face[1]
+        temp[6] = self.face[8]
+        temp[7] = self.face[5]
+        temp[8] = self.face[2]
+        self.face = temp
 
-	def rotateCounter():
-		temp = face
-		temp[0] = face[2]
-		temp[1] = face[5]
-		temp[2] = face[8]
-		temp[3] = face[1]
-		#faceClone[4] = face[4] (always static)
-		temp[5] = face[7]
-		temp[6] = face[0]
-		temp[7] = face[3]
-		temp[8]	= face[6]
-		face = temp
-	
-	def allSameColor():
-		color = face[0]
-		for test in face:
-			if test != color:
-				return False
-		return True
+    # Rotate a face counter-clockwise
+    def rotateCounter(self):
+        temp = self.face
+        temp[0] = self.face[2]
+        temp[1] = self.face[5]
+        temp[2] = self.face[8]
+        temp[3] = self.face[1]
+        #faceClone[4] = face[4] (always static)
+        temp[5] = self.face[7]
+        temp[6] = self.face[0]
+        temp[7] = self.face[3]
+        temp[8] = self.face[6]
+        self.face = temp
+    
+    # Are all the pieces on the face the same color? If so, we can use this to check
+    # for a goal state.
+    def allSameColor():
+        color = face[0]
+        for test in face:
+            if test != color:
+                return False
+        return True
 
+# The Cube
 class Rubik:
+    # States taken so far, on a stack
+    paths = []
 
-	paths = []
+    # The faces on the cube.
+    top = Face()
+    bottom = Face()
+    left = Face()
+    right = Face()
+    front = Face()
+    back = Face()
 
-	# Representation is stored in a 9-element list
-	# 1-3, 4-6, 7-9
-	top = Face()
-	bottom = Face()
-	left = Face()
-	right = Face()
-	front = Face()
-	back = Face()
-	
-	def successors():
-		TopCounter = Rubik(self).topCounter()
-		TopCounter.paths.push("TCo")
+	# Constructor
+    def __init__(self):
+        paths = []
+    
+    # Successor Function
+    def successors(self):
+        toReturn = []
+        TopCounter = copy.deepcopy(self)
+        TopCounter.topCounter()
+        TopCounter.paths.append("TCo")
+        toReturn.append(TopCounter)
+        
+        TopClock = copy.deepcopy(self)
+        TopClock.topClock()
+        TopClock.paths.append("TCl")
+        toReturn.append(TopClock)
 
-		TopClock = Rubik(self).topClock()
-		TopClock.paths.push("TCl")
+        LeftForward = copy.deepcopy(self)
+        LeftForward.leftForward()
+        LeftForward.paths.append("LF")
+        toReturn.append(LeftForward)
 
-		LeftForward = Rubik(self).leftForward()
-		LeftForward.paths.push("LF")
+        LeftBackward = copy.deepcopy(self)
+        LeftBackward.leftBackward()
+        LeftBackward.paths.append("LB")
+        toReturn.append(LeftBackward)
 
-		LeftBackward = Rubik(self).leftBackward()
-		LeftBackward.paths.push("LB")
+        RightForward = copy.deepcopy(self)
+        RightForward.rightForward()
+        RightForward.paths.append("RF")
+        toReturn.append(RightForward)
 
-		RightForward = Rubik(self).rightForward()
-		RightForward.paths.push("RF")
+        RightBackward = copy.deepcopy(self)
+        RightBackward.rightBackward()
+        RightBackward.paths.append("RB")
+        toReturn.append(RightBackward)
 
-		RightBackward = Rubik(self).rightBackward()
-		RightBackward.paths.push("RB")
+        BottomCounter = copy.deepcopy(self)
+        BottomCounter.bottomCounter()
+        BottomCounter.paths.append("BCo")
+        toReturn.append(BottomCounter)
 
-		BottomCounter = Rubik(self).bottomCounter()
-		BottomCounter.paths.push("BCo")
+        BottomClock = copy.deepcopy(self)
+        BottomClock.bottomClock()
+        BottomClock.paths.append("BCl")
+        toReturn.append(BottomClock)
 
-		BottomClock = Rubik(self).bottomClock()
-		BottomClock.paths.push("BCl")
+        FrontClock = copy.deepcopy(self)
+        FrontClock.frontClock()
+        FrontClock.paths.append("FCl")
+        toReturn.append(FrontClock)
 
-		FrontClock = Rubik(self).frontClock()
-		FrontClock.paths.push("FCl")
+        FrontCounter = copy.deepcopy(self)
+        FrontCounter.frontCounter()
+        FrontCounter.paths.append("FCo")
+        toReturn.append(FrontCounter)
 
-		FrontCounter = Rubik(self).frontCounter()
-		FrontCounter.paths.push("FCo")
+        BackClock = copy.deepcopy(self)
+        BackClock.backClock()
+        BackClock.paths.append("BaCl")
+        toReturn.append(BackClock)
 
-		BackClock = Rubik(self).backClock()
-		BackClock.paths.push("BaCl")
+        BackCounter = copy.deepcopy(self)
+        BackCounter.backCounter()
+        BackCounter.paths.append("BaCo")
+        toReturn.append(BackCounter)
+        return toReturn
+        
+    # String representation of the cube. Good for closed list as well as debugging.
+    def dictKey(self):
+        toReturn = []
+        toReturn.extend(self.top.face)
+        toReturn.extend(self.bottom.face)
+        toReturn.extend(self.left.face)
+        toReturn.extend(self.right.face)
+        toReturn.extend(self.front.face)
+        toReturn.extend(self.back.face)
+        return ''.join(toReturn)
+    
+    # Check if we have reached the goal state.
+    def goalCheck():
+        return top.allSameColor() and bottom.allSameColor() and left.allSameColor() and right.allSameColor() and front.allSameColor() and back.allSameColor()
 
-		BackCounter = Rubik(self).backCounter()
-		BackCounter.paths.push("BaCo")
-
-		return [
-			TopCounter, 
-			TopClock, 
-			LeftForward, 
-			LeftBackward, 
-			RightForward, 
-			RightBackward, 
-			BottomCounter, 
-			BottomClock, 
-			FrontClock, 
-			FrontCounter, 
-			BackClock, 
-			BackCounter,
-			]
-
-	def dictKey():
-		toReturn = []
-		toReturn.append(top.face)
-		toReturn.append(bottom.face)
-		toReturn.append(left.face)
-		toReturn.append(right.face)
-		toReturn.append(front.face)
-		toReturn.append(back.face)
-		return toReturn
-	
-	def goalCheck():
-		return top.allSameColor() 
-			and bottom.allSameColor() 
-			and left.allSameColor() 
-			and right.allSameColor()
-			and front.allSameColor()
-			and back.allSameColor()
-
-	def topCounter():
-		top.rotateCounter()
-		temp1 = front.face[0]
-		temp2 = front.face[1]
-		temp3 = front.face[2]
-		front.face[0] = left.face[2]
-		front.face[1] = left.face[5]
-		front.face[2] = left.face[8]
-		left.face[2] = back.face[8]
-		left.face[5] = back.face[7]
-		left.face[8] = back.face[6]
-		back.face[8] = right.face[6]
-		back.face[7] = right.face[3]
-		back.face[6] = right.face[0]
-		right.face[6] = temp1
-		right.face[3] = temp2
-		right.face[0] = temp3
-
-
-	def topClock():
-		top.rotateClock()
-		temp1 = front.face[0]
-		temp2 = front.face[1]
-		temp3 = front.face[2]
-		front.face[0] = right.face[0]
-		front.face[1] = right.face[3]
-		front.face[2] = right.face[6]
-		right.face[0] = back.face[6]
-		right.face[3] = back.face[7]
-		right.face[6] = back.face[8]
-		back.face[6] = left.face[8]
-		back.face[7] = left.face[5]
-		back.face[8] = left.face[2]		
-		left.face[8] = temp3
-		left.face[5] = temp2
-		left.face[2] = temp1
-
-	def leftForward():
-		left.rotateClock()
-		temp1 = front.face[0]
-		temp2 = front.face[3]
-		temp3 = front.face[6]
-		front.face[0] = top.face[0]
-		front.face[3] = top.face[3]
-		front.face[6] = top.face[6]
-		top.face[0] = back.face[0]
-		top.face[3] = back.face[3]
-		top.face[6] = back.face[6]
-		back.face[0] = bottom.face[0]
-		back.face[3] = bottom.face[3]
-		back.face[6] = bottom.face[6]
-		bottom.face[0] = temp1
-		bottom.face[3] = temp2
-		bottom.face[6] = temp3
-
-	
-	def leftBackward():
-		left.rotateCounter()
-		temp1 = front.face[0]
-		temp2 = front.face[3]
-		temp3 = front.face[6]
-		front.face[0] = bottom.face[0]
-		front.face[3] = bottom.face[3]
-		front.face[6] = bottom.face[6]
-		bottom.face[0] = back.face[0]
-		bottom.face[3] = back.face[3]
-		bottom.face[6] = back.face[6]
-		back.face[0] = top.face[0]
-		back.face[3] = top.face[3]
-		back.face[6] = top.face[6]
-		top.face[0] = temp1
-		top.face[3] = temp2
-		top.face[6] = temp3
-
-	def rightForward():
-		right.rotateCounter()
-		temp1 = front.face[2]
-		temp2 = front.face[5]
-		temp3 = front.face[8]
-		front.face[2] = top.face[2]
-		front.face[5] = top.face[5]
-		front.face[8] = top.face[8]
-		top.face[2] = back.face[2]
-		top.face[5] = back.face[5]
-		top.face[8] = back.face[8]
-		back.face[2] = bottom.face[2]
-		back.face[5] = bottom.face[5]
-		back.face[8] = bottom.face[8]
-		bottom.face[2] = temp1
-		bottom.face[5] = temp2
-		bottom.face[8] = temp3
-	
-	def rightBackward():
-		right.rotateClock()
-		temp1 = front.face[2]
-		temp2 = front.face[5]
-		temp3 = front.face[8]
-		front.face[2] = bottom.face[2]
-		front.face[5] = bottom.face[5]
-		front.face[8] = bottom.face[8]
-		bottom.face[2] = back.face[2]
-		bottom.face[5] = back.face[5]
-		bottom.face[8] = back.face[8]
-		back.face[2] = top.face[2]
-		back.face[5] = top.face[5]
-		back.face[8] = top.face[8]
-		top.face[2] = temp1
-		top.face[5] = temp2
-		top.face[8] = temp3
-	
-	#As Viewed from the TOP
-	def bottomCounter():
-		bottom.rotateCounter()
-		temp1 = front.face[6]
-		temp2 = front.face[7]
-		temp3 = front.face[8]
-		front.face[6] = left.face[0]
-		front.face[7] = left.face[3]
-		front.face[8] = left.face[6]
-		left.face[0] = back.face[2]
-		left.face[3] = back.face[1]
-		left.face[6] = back.face[0]
-		back.face[2] = right.face[8]
-		back.face[1] = right.face[5]
-		back.face[0] = right.face[2]
-		right.face[8] = temp1
-		right.face[5] = temp2
-		right.face[2] = temp3
-
-	#As View from the TOP
-	def bottomClock():
-		bottom.rotateClock()
-		temp1 = front.face[6]
-		temp2 = front.face[7]
-		temp3 = front.face[8]
-		front.face[6] = right.face[8]
-		front.face[7] = right.face[5]
-		front.face[8] = right.face[2]
-		right.face[8] = back.face[2]
-		right.face[5] = back.face[1]
-		right.face[2] = back.face[0]
-		back.face[2] = left.face[0]
-		back.face[1] = left.face[3]
-		back.face[0] = left.face[6]
-		left.face[0] = temp1
-		left.face[3] = temp2
-		left.face[6] = temp3
-	
-	def frontClock():
-		front.rotateClock()
-		temp1 = top.face[6]
-		temp2 = top.face[7]
-		temp3 = top.face[8]
-		top.face[6] = left.face[6]
-		top.face[7] = left.face[7]
-		top.face[8] = left.face[8]
-		left.face[6] = bottom.face[2]
-		left.face[7] = bottom.face[1]
-		left.face[8] = bottom.face[0]
-		bottom.face[2] = right.face[6]
-		bottom.face[1] = right.face[7]
-		bottom.face[0] = right.face[8]
-		right.face[6] = temp1
-		right.face[7] = temp2
-		right.face[8] = temp3
-
-	def frontCounter():
-		front.rotateCounter()
-		temp1 = top.face[6]
-		temp2 = top.face[7]
-		temp3 = top.face[8]
-		top.face[6] = right.face[6]
-		top.face[7] = right.face[7]
-		top.face[8] = right.face[8]
-		right.face[6] = bottom.face[2]
-		right.face[7] = bottom.face[1]
-		right.face[8] = bottom.face[0]
-		bottom.face[2] = left.face[6] 
-		bottom.face[1] = left.face[7]
-		bottom.face[0] = left.face[8]
-		left.face[6] = temp1
-		left.face[7] = temp2
-		left.face[8] = temp3
-	
-	def backClock():
-		back.rotateCounter()
-		temp1 = top.face[0]
-		temp2 = top.face[1]
-		temp3 = top.face[2]
-		top.face[0] = left.face[0]
-		top.face[1] = left.face[1]
-		top.face[2] = left.face[2]
-		left.face[0] = bottom.face[6]
-		left.face[1] = bottom.face[7]
-		left.face[2] = bottom.face[8]
-		bottom.face[6] = right.face[2]
-		bottom.face[7] = right.face[1]
-		bottom.face[8] = right.face[0]
-		right.face[2] = temp3
-		right.face[1] = temp2
-		right.face[0] = temp1
+	# Rotate the top counterclockwise.
+    def topCounter(self):
+        self.top.rotateCounter()
+        temp1 = self.front.face[0]
+        temp2 = self.front.face[1]
+        temp3 = self.front.face[2]
+        self.front.face[0] = self.left.face[2]
+        self.front.face[1] = self.left.face[5]
+        self.front.face[2] = self.left.face[8]
+        self.left.face[2] = self.back.face[8]
+        self.left.face[5] = self.back.face[7]
+        self.left.face[8] = self.back.face[6]
+        self.back.face[8] = self.right.face[6]
+        self.back.face[7] = self.right.face[3]
+        self.back.face[6] = self.right.face[0]
+        self.right.face[6] = temp1
+        self.right.face[3] = temp2
+        self.right.face[0] = temp3
 
 
-	def backCounter():
-		back.rotateClock()
-		temp1 = top.face[0]
-		temp2 = top.face[1]
-		temp3 = top.face[2]
-		top.face[0] = right.face[0]
-		top.face[1] = right.face[1]
-		top.face[2] = right.face[2]
-		right.face[0] = bottom.face[8]
-		right.face[1] = bottom.face[7]
-		right.face[2] = bottom.face[6]
-		bottom.face[8] = left.face[2]
-		bottom.face[7] = left.face[1]
-		bottom.face[6] = left.face[0]
-		left.face[2] = temp3
-		left.face[1] = temp2
-		left.face[0] = temp1
+    # Rotate the top clockwise.
+    def topClock(self):
+        self.top.rotateClock()
+        temp1 = self.front.face[0]
+        temp2 = self.front.face[1]
+        temp3 = self.front.face[2]
+        self.front.face[0] = self.right.face[0]
+        self.front.face[1] = self.right.face[3]
+        self.front.face[2] = self.right.face[6]
+        self.right.face[0] = self.back.face[6]
+        self.right.face[3] = self.back.face[7]
+        self.right.face[6] = self.back.face[8]
+        self.back.face[6] = self.left.face[8]
+        self.back.face[7] = self.left.face[5]
+        self.back.face[8] = self.left.face[2]       
+        self.left.face[8] = temp3
+        self.left.face[5] = temp2
+        self.left.face[2] = temp1
+
+    # Rotate the left forward (towards you)
+    def leftForward(self):
+        self.left.rotateClock()
+        temp1 = self.front.face[0]
+        temp2 = self.front.face[3]
+        temp3 = self.front.face[6]
+        self.front.face[0] = self.top.face[0]
+        self.front.face[3] = self.top.face[3]
+        self.front.face[6] = self.top.face[6]
+        self.top.face[0] = self.back.face[0]
+        self.top.face[3] = self.back.face[3]
+        self.top.face[6] = self.back.face[6]
+        self.back.face[0] = self.bottom.face[0]
+        self.back.face[3] = self.bottom.face[3]
+        self.back.face[6] = self.bottom.face[6]
+        self.bottom.face[0] = temp1
+        self.bottom.face[3] = temp2
+        self.bottom.face[6] = temp3
+
+    # Rotate the left backwards (away from you)
+    def leftBackward(self):
+        self.left.rotateCounter()
+        temp1 = self.front.face[0]
+        temp2 = self.front.face[3]
+        temp3 = self.front.face[6]
+        self.front.face[0] = self.bottom.face[0]
+        self.front.face[3] = self.bottom.face[3]
+        self.front.face[6] = self.bottom.face[6]
+        self.bottom.face[0] = self.back.face[0]
+        self.bottom.face[3] = self.back.face[3]
+        self.bottom.face[6] = self.back.face[6]
+        self.back.face[0] = self.top.face[0]
+        self.back.face[3] = self.top.face[3]
+        self.back.face[6] = self.top.face[6]
+        self.top.face[0] = temp1
+        self.top.face[3] = temp2
+        self.top.face[6] = temp3
+
+    # Rotate the right side forwards (towards you)
+    def rightForward(self):
+        self.right.rotateCounter()
+        temp1 = self.front.face[2]
+        temp2 = self.front.face[5]
+        temp3 = self.front.face[8]
+        self.front.face[2] = self.top.face[2]
+        self.front.face[5] = self.top.face[5]
+        self.front.face[8] = self.top.face[8]
+        self.top.face[2] = self.back.face[2]
+        self.top.face[5] = self.back.face[5]
+        self.top.face[8] = self.back.face[8]
+        self.back.face[2] = self.bottom.face[2]
+        self.back.face[5] = self.bottom.face[5]
+        self.back.face[8] = self.bottom.face[8]
+        self.bottom.face[2] = temp1
+        self.bottom.face[5] = temp2
+        self.bottom.face[8] = temp3
+    
+    # Rotate the right side backwards (away from you)
+    def rightBackward(self):
+        self.right.rotateClock()
+        temp1 = self.front.face[2]
+        temp2 = self.front.face[5]
+        temp3 = self.front.face[8]
+        self.front.face[2] = self.bottom.face[2]
+        self.front.face[5] = self.bottom.face[5]
+        self.front.face[8] = self.bottom.face[8]
+        self.bottom.face[2] = self.back.face[2]
+        self.bottom.face[5] = self.back.face[5]
+        self.bottom.face[8] = self.back.face[8]
+        self.back.face[2] = self.top.face[2]
+        self.back.face[5] = self.top.face[5]
+        self.back.face[8] = self.top.face[8]
+        self.top.face[2] = temp1
+        self.top.face[5] = temp2
+        self.top.face[8] = temp3
+    
+    # Rotate the bottom counter clockwise (as viewed from the perspective of the top)
+    def bottomCounter(self):
+        self.bottom.rotateCounter()
+        temp1 = self.front.face[6]
+        temp2 = self.front.face[7]
+        temp3 = self.front.face[8]
+        self.front.face[6] = self.left.face[0]
+        self.front.face[7] = self.left.face[3]
+        self.front.face[8] = self.left.face[6]
+        self.left.face[0] = self.back.face[2]
+        self.left.face[3] = self.back.face[1]
+        self.left.face[6] = self.back.face[0]
+        self.back.face[2] = self.right.face[8]
+        self.back.face[1] = self.right.face[5]
+        self.back.face[0] = self.right.face[2]
+        self.right.face[8] = temp1
+        self.right.face[5] = temp2
+        self.right.face[2] = temp3
+
+    # Rotate the bottom clockwise, (as viewed from the perspective of the top)
+    def bottomClock(self):
+        self.bottom.rotateClock()
+        temp1 = self.front.face[6]
+        temp2 = self.front.face[7]
+        temp3 = self.front.face[8]
+        self.front.face[6] = self.right.face[8]
+        self.front.face[7] = self.right.face[5]
+        self.front.face[8] = self.right.face[2]
+        self.right.face[8] = self.back.face[2]
+        self.right.face[5] = self.back.face[1]
+        self.right.face[2] = self.back.face[0]
+        self.back.face[2] = self.left.face[0]
+        self.back.face[1] = self.left.face[3]
+        self.back.face[0] = self.left.face[6]
+        self.left.face[0] = temp1
+        self.left.face[3] = temp2
+        self.left.face[6] = temp3
+    
+    # Rotate the front clockwise
+    def frontClock(self):
+        self.front.rotateClock()
+        temp1 = self.top.face[6]
+        temp2 = self.top.face[7]
+        temp3 = self.top.face[8]
+        self.top.face[6] = self.left.face[6]
+        self.top.face[7] = self.left.face[7]
+        self.top.face[8] = self.left.face[8]
+        self.left.face[6] = self.bottom.face[2]
+        self.left.face[7] = self.bottom.face[1]
+        self.left.face[8] = self.bottom.face[0]
+        self.bottom.face[2] = self.right.face[6]
+        self.bottom.face[1] = self.right.face[7]
+        self.bottom.face[0] = self.right.face[8]
+        self.right.face[6] = temp1
+        self.right.face[7] = temp2
+        self.right.face[8] = temp3
+
+    # Rotate the front counterclockwise
+    def frontCounter(self):
+        self.front.rotateCounter()
+        temp1 = self.top.face[6]
+        temp2 = self.top.face[7]
+        temp3 = self.top.face[8]
+        self.top.face[6] = self.right.face[6]
+        self.top.face[7] = self.right.face[7]
+        self.top.face[8] = self.right.face[8]
+        self.right.face[6] = self.bottom.face[2]
+        self.right.face[7] = self.bottom.face[1]
+        self.right.face[8] = self.bottom.face[0]
+        self.bottom.face[2] = self.left.face[6] 
+        self.bottom.face[1] = self.left.face[7]
+        self.bottom.face[0] = self.left.face[8]
+        self.left.face[6] = temp1
+        self.left.face[7] = temp2
+        self.left.face[8] = temp3
+    
+    # Rotate the back side clockwise.
+    def backClock(self):
+        self.back.rotateCounter()
+        temp1 = self.top.face[0]
+        temp2 = self.top.face[1]
+        temp3 = self.top.face[2]
+        self.top.face[0] = self.left.face[0]
+        self.top.face[1] = self.left.face[1]
+        self.top.face[2] = self.left.face[2]
+        self.left.face[0] = self.bottom.face[6]
+        self.left.face[1] = self.bottom.face[7]
+        self.left.face[2] = self.bottom.face[8]
+        self.bottom.face[6] = self.right.face[2]
+        self.bottom.face[7] = self.right.face[1]
+        self.bottom.face[8] = self.right.face[0]
+        self.right.face[2] = temp3
+        self.right.face[1] = temp2
+        self.right.face[0] = temp1
+
+    # Rotate the back side counter-clockwise.
+    def backCounter(self):
+        self.back.rotateClock()
+        temp1 = self.top.face[0]
+        temp2 = self.top.face[1]
+        temp3 = self.top.face[2]
+        self.top.face[0] = self.right.face[0]
+        self.top.face[1] = self.right.face[1]
+        self.top.face[2] = self.right.face[2]
+        self.right.face[0] = self.bottom.face[8]
+        self.right.face[1] = self.bottom.face[7]
+        self.right.face[2] = self.bottom.face[6]
+        self.bottom.face[8] = self.left.face[2]
+        self.bottom.face[7] = self.left.face[1]
+        self.bottom.face[6] = self.left.face[0]
+        self.left.face[2] = temp3
+        self.left.face[1] = temp2
+        self.left.face[0] = temp1
+
+# Main Application Class
+class RubikCube:
+
+    def solve(self):
+        Cube = Rubik()
+        f = open(sys.argv[1], "r")
+        #Tried to refactor this but got a bunch of errors? Not sure whats going on.
+        # Read in the files.
+        Cube.back.face = f.readline().split()
+        Cube.back.face.extend(f.readline().split())
+        Cube.back.face.extend(f.readline().split())
+        Cube.left.face = f.readline().split()
+        Cube.left.face.extend(f.readline().split())
+        Cube.left.face.extend(f.readline().split())
+        Cube.top.face = f.readline().split()
+        Cube.top.face.extend(f.readline().split())
+        Cube.top.face.extend(f.readline().split())
+        Cube.right.face = f.readline().split()
+        Cube.right.face.extend(f.readline().split())
+        Cube.right.face.extend(f.readline().split())
+        Cube.front.face = f.readline().split()
+        Cube.front.face.extend(f.readline().split())
+        Cube.front.face.extend(f.readline().split())
+        Cube.bottom.face = f.readline().split()
+        Cube.bottom.face.extend(f.readline().split())
+        Cube.bottom.face.extend(f.readline().split())
+        f.close()
+        # Create an initial open and closed list.
+        openList = Cube.successors()
+        closeList = {}
+        closeList[Cube.dictKey()] = Cube
+        while len(openList) > 0:
+            newCube = openList.pop()
+            print newCube.dictKey()
+            if closeList.has_key(newCube.dictKey()) or (len(newCube.paths) == 20):
+                continue
+            else:
+                closeList[newCube.dictKey()] = newCube
+                
+            if newCube.goalCheck():
+                return ', '.join(newCube.paths)
+            else:
+                for successor in newCube.successors():
+                    if not closeList.has_key(successor.dictKey()):
+                        openList.append(successor)
+        return 'Done'
 
 
-
-class Solver:
-	Cube = Rubik()
-
-	def readFace(face, f):
-		line1 = f.readLine().split()
-		line2 = f.readLine().split()
-		line3 = f.readLine().split()
-		face = line1
-		face[3] = line2[0]
-		face[4] = line2[1]
-		face[5] = line2[2]
-		face[6] = line3[0]
-		face[7] = line3[1]
-		face[8] = line4[2]
-
-	def load():
-		f = open(sys.argv[1], "r")
-		readFace(Cube.back, f)
-		readFace(Cube.left, f)
-		readFace(Cube.top, f)
-		readFace(Cube.right, f)
-		readFace(Cube.front, f)
-		readFace(Cube.bottom, f)
-		f.close()
-
-	# Main Algorithm
-	def solve():
-		load()
-		openList = Cube.successors()
-		closeList = {}
-		moves = 0
-		while True:
-			newCube = openList.pop()
-			if closeList.hasKey(newCube.dictKey()) or (len(newCube.paths) == 20):
-				continue
-			else:
-				closeList[newCube.dictKey()] = newCube
-
-			if newCube.goalCheck():
-				return ", ".join(newCube.paths)
-			else:
-				for cube in newCube.successors():
-					if !closeList.hasKey(cube.dictKey()):
-						openList.push(cube)
-			if len(openList) == 0:
-				break
-			return "failure"
-
-
-##################
-### Run ##########
-DoIt = Solver()
-DoIt.solve()
-
-
-
-
-
-
-		
+# On start.
+if __name__=="__main__":    
+    c = RubikCube()
+    print c.solve()

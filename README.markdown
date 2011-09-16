@@ -14,6 +14,7 @@ R = Red
 
 arg1: A text file in the following format:
 
+
           W W W
           W W W
           W W W
@@ -27,27 +28,22 @@ arg1: A text file in the following format:
           O O O
           O O O
 
-    #Back
+Unwrapped
     W W W
     W W W
     W W W
-    #Left
     G G G
     G G G
     G G G
-    #Top
     R R R 
     R R R 
     R R R
-    #Right 
     B B B
     B B B
     B B B
-    #Front
     Y Y Y
     Y Y Y
     Y Y Y
-    #Bottom
     O O O
     O O O
     O O O
